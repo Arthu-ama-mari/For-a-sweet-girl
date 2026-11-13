@@ -508,7 +508,7 @@ Eu te amo Amari, te amo de verdade e profundamente, toda vez que olho para o seu
   </button>
 
   <!-- AUDIO PLAYER COM O LINK DO LITTERBOX -->
-  <audio id="bgMusic" src="https://litter.catbox.moe/an3mwooqi3rrus8z.mp3" preload="auto"></audio>
+  <audio id="bgMusic" src="https://litter.catbox.moe/an3mwooqi3rrus8z.mp3" preload="auto" loop></audio>
 
   <script>
    // GERADOR AUTOMÁTICO DE ESTRELINHAS MAIS VISÍVEIS
@@ -597,29 +597,30 @@ function startSequence() {
 
             currentStep++;
           }
-        } else if (currentTime >= 57.0) {
-          clearInterval(syncInterval);
-          lyricCard.classList.remove('show');
-          setTimeout(() => {
-            animScreen.classList.remove('active');
-            letterScreen.classList.add('active');
-            document.body.classList.add('scrollable'); // Libera rolagem para ler a carta
-            replayBtn.style.display = 'flex';
-          }, 400);
-        }
+       } else if (currentTime >= 57.0) {
+        clearInterval(syncInterval);
+        lyricCard.classList.remove('show');
+        setTimeout(() => {
+          animScreen.classList.remove('active');
+          letterScreen.classList.add('active');
+          audio.currentTime = 0; // <--- Reinicia a música do começo certinho para o loop
+          document.body.classList.add('scrollable');
+          replayBtn.style.display = 'flex';
+        }, 400);
+      }
       }, 50);
     }
 
     function pularParaCarta() {
-      clearInterval(syncInterval);
-      audio.pause();
-      audio.currentTime = 57.0; 
-      lyricCard.classList.remove('show');
-      animScreen.classList.remove('active');
-      letterScreen.classList.add('active');
-      document.body.classList.add('scrollable'); // Libera rolagem para ler a carta
-      replayBtn.style.display = 'flex';
-    }
+    clearInterval(syncInterval);
+    audio.currentTime = 0; // <--- Garante que se ela pular a intro, a música começa do zero em loop
+    audio.play().catch(e => console.log("Erro no áudio:", e)); // <--- Garante o play
+    lyricCard.classList.remove('show');
+    animScreen.classList.remove('active');
+    letterScreen.classList.add('active');
+    document.body.classList.add('scrollable');
+    replayBtn.style.display = 'flex';
+  }
   </script>
 </body>
 </html>
