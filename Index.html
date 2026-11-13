@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Uma Carta Especial Para Você ♥</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- IMPORTANDO AS DUAS FONTES DO GOOGLE JUNTAS -->
+  <link href="https://fonts.googleapis.com/css2?family=Agbalumo&family=Comfortaa:wght@500;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* APLICANDO AS FONTES NOS ELEMENTOS CORRETOS */
+
+    /* 1. FONTES AGBALUMO (Títulos, Frases da animação e Nome da música) */
+    .profile-title, .lyric-text, .song-name {
+      font-family: 'Agbalumo', cursive !important;
+    }
+
+    /* 2. FONTES COMFORTAA (Textos, Subtítulos, Tags, Botões e Restante geral) */
+    body, .envelope-text, .waiting-intro, .status-tag, .letter-body, .artist-name, button {
+      font-family: 'Comfortaa', cursive !important;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+      body {
+      background: linear-gradient(to top, #ffd1dc 0%, #ffeef2 100%);
+      background-attachment: fixed;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden; /* Trava a rolagem nas telas iniciais */
+      color: #6c5b7b;
+      position: relative;
+    }
+
+    body.scrollable {
+      overflow-y: auto; /* Libera a rolagem apenas na carta */
+      align-items: flex-start;
+      padding-top: 30px;
+    }
+
+   /* ESTILO DAS ESTRELINHAS FLUTUANTES BEM VISÍVEIS */
+    .floating-star {
+      position: fixed;
+      top: 0;
+      left: 0;
+      background: #ffffff;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: floatUpStars linear infinite;
+      opacity: 0.95;
+      box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+      z-index: 1;
+    }
+
+    @keyframes floatUpStars {
+      0% {
+        transform: translateY(100vh) scale(0.6);
+        opacity: 0;
+      }
+      15% {
+        opacity: 0.95; /* Aparece logo embaixo */
+      }
+      70% {
+        opacity: 0.95; /* Fica forte subindo pela tela inteira */
+      }
+      100% {
+        transform: translateY(-5vh) scale(1.1);
+        opacity: 0; /* Some só lá em cima */
+      }
+    }
+
+    .container {
+      width: 100%;
+      max-width: 660px; /* <--- Aumentamos aqui também para combinar com a caixa */
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* TELA 1: ENVELOPE / DESENHO */
+    .envelope-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 25px;
+      text-align: center;
+      z-index: 5;
+      transition: opacity 0.5s ease;
+    }
+
+    .envelope-screen.hidden {
+      display: none !important;
+    }
+
+    /* ESTILO DO CARD COM O SEU DESENHO PULANDO */
+    .card-preview-thumb {
+      background: #ffffff;
+      border-radius: 20px;
+      border: 4px dashed #ffb6c1;
+      box-shadow: 0 15px 35px rgba(255, 182, 193, 0.4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 25px;
+      position: relative;
+      cursor: pointer;
+      animation: bounceDrawing 2s ease-in-out infinite;
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .card-preview-thumb:hover {
+      transform: translateY(-8px) rotate(-1deg);
+    }
+
+    .envelope-text {
+      color: #ff7b9c;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-top: 10px;
+    }
+
+    /* TELA 2: ANIMAÇÃO DAS FRASES E DESENHOS */
+    .animation-screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 80vh;
+      z-index: 10;
+      position: relative;
+    }
+
+    .animation-screen.active {
+      display: flex !important;
+    }
+
+    .waiting-intro {
+      color: #ff7b9c;
+      font-size: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      animation: floatIntro 2s ease-in-out infinite;
+      font-weight: 700;
+    }
+
+    @keyframes floatIntro {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .lyric-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(8px);
+      border: 3px solid #ffccd5;
+      padding: 25px 35px;
+      border-radius: 30px;
+      box-shadow: 0 20px 40px rgba(255, 182, 193, 0.3);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      transform: scale(0.8);
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .lyric-card.show {
+      display: flex !important;
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    .lyric-text {
+      font-size: 2rem;
+      color: #ff5e7e;
+      text-shadow: 2px 2px 0px #fff;
+      text-align: center;
+    }
+
+    .doodle-container {
+      width: 240px;
+      height: 230px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: bounceDrawing 2s ease-in-out infinite;
+    }
+
+    .doodle-img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 5px 10px rgba(255, 123, 156, 0.25));
+    }
+
+    @keyframes bounceDrawing {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-8px) scale(1.03); }
+    }
+
+    /* TELA 3: CARTA ESTILO CARRD/STRAWPAGE */
+    .letter-screen {
+      display: none;
+      width: 100%;
+      flex-direction: column;
+      align-items: center;
+      padding-bottom: 70px;
+    }
+
+    .letter-screen.active {
+      display: flex !important;
+      animation: fadeIn 1s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+ .carrd-container {
+      background: #ffffff;
+      border-radius: 28px;
+      width: 100%;
+      max-width: 620px; /* <--- Aumentamos de 480px para 620px para ficar mais gordinha e espaçosa */
+      box-shadow: 0 20px 50px rgba(255, 182, 193, 0.35);
+      border: 3px dashed #ffb6c1;
+      outline: 5px solid #fff0f3;
+      padding: 35px 30px; /* Mais respiro nas laterais */
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .profile-header {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 15px;
+      margin-bottom: 10px;
+      width: 100%;
+      text-align: left;
+    }
+
+    .avatar-wrapper {
+      position: relative;
+      width: 190px;
+      height: 190px;
+      flex-shrink: 0;
+      animation: bounceDrawing 2s ease-in-out infinite;
+    }
+
+    .avatar-img {
+      width: 100%;
+      height: 100%;
+      border-radius: 0;
+      object-fit: contain;
+      border: none;
+      box-shadow: none;
+    }
+
+    .profile-info-col {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+      flex: 1;
+    }
+
+    .profile-title {
+      font-size: 1.5rem;
+      color: #ff6b8b;
+      letter-spacing: 1px;
+      text-align: left;
+      line-height: 1.1;
+    }
+
+    .status-tag {
+      background: #fff0f3;
+      color: #ff5e7e;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      border: 1px solid #ffccd5;
+    }
+
+    .badges-row {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      margin-top: 2px;
+      font-size: 0.8rem;
+    }
+
+    .divider {
+      width: 80%;
+      height: 2px;
+      background: repeating-linear-gradient(90deg, #ffccd5, #ffccd5 6px, transparent 6px, transparent 12px);
+      margin: 10px 0;
+    }
+
+    .letter-body {
+      background: #fffafb;
+      border: 2px solid #ffe3e8;
+      border-radius: 20px;
+      padding: 22px;
+      width: 100%;
+      line-height: 1.7;
+      font-size: 0.95rem;
+      color: #555;
+      white-space: pre-line;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.02);
+    }
+
+    .music-player-widget {
+      margin-top: 20px;
+      background: #fff;
+      border: 2px solid #ffccd5;
+      border-radius: 50px;
+      padding: 8px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 4px 12px rgba(255, 182, 193, 0.2);
+    }
+
+    .music-disc {
+      width: 32px;
+      height: 32px;
+      background: #ff7b9c;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 14px;
+      animation: spin 4s linear infinite;
+    }
+
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+
+    .song-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .song-name {
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: #ff5e7e;
+    }
+
+    .artist-name {
+      font-size: 0.75rem;
+      color: #aaa;
+      font-weight: 500;
+    }
+
+    /* BOTÃO FIXO DE REVER ANIMAÇÃO NO CANTO INFERIOR DIREITO */
+    .replay-btn-fixed {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #ff7b9c;
+      color: white;
+      border: 2px solid #ffffff;
+      padding: 10px 18px;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(255, 123, 156, 0.4);
+      z-index: 99;
+      display: none;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .replay-btn-fixed:hover {
+      transform: scale(1.05);
+      background: #ff5e7e;
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- TELA 1: INICIAL / DESENHO -->
+    <div class="envelope-screen" id="envelopeScreen">
+      <!-- CARD CLICÁVEL COM O SEU DESENHO E A NOTIFICAÇÃO "1" -->
+      <div class="card-preview-thumb" onclick="startSequence()">
+        
+        <!-- BOLINHA DE NOTIFICAÇÃO "1" -->
+        <div style="position: absolute; top: 12px; right: 12px; background: #ff3366; color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; box-shadow: 0 4px 10px rgba(255,51,102,0.4); border: 2px solid white; z-index: 10;">
+          1
+        </div>
+
+        <!-- SEU DESENHO NO LUGAR DO ENVELOPE -->
+        <img src="https://i.postimg.cc/cHnG4WcM/29-Sem-Titulo-20261112215803.png" alt="Meu Desenho" style="width: 200px; height: auto; display: block; border-radius: 12px;">
+      </div>
+
+      <div class="envelope-text">New mail for u!</div>
+    </div>
+
+    <!-- TELA 2: ANIMAÇÃO DAS FRASES E DESENHOS -->
+    <div class="animation-screen" id="animScreen">
+      <!-- BOTÃO DE PULAR INTRODUÇÃO -->
+      <button onclick="pularParaCarta()" style="position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.9); border: 2px solid #ffccd5; color: #ff5e7e; padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.05); z-index: 20;">
+        ⏭ Pular intro
+      </button>
+
+      <div class="waiting-intro" id="waitingIntro">
+        <span style="font-size: 50px;">🎶</span>
+        <span>Escute a introdução...</span>
+      </div>
+
+      <div class="lyric-card" id="lyricCard">
+        <div class="doodle-container" id="doodleBox"></div>
+        <div class="lyric-text" id="lyricText"></div>
+      </div>
+    </div>
+
+    <!-- TELA 3: CARTA ESTILO CARRD/STRAWPAGE -->
+    <div class="letter-screen" id="letterScreen">
+      <div class="carrd-container">
+        
+        <div class="profile-header">
+          <!-- FOTO COM O SEU MOLDE E ANIMAÇÃO DE PULADINHO -->
+          <div class="avatar-wrapper">
+            <img src="https://i.postimg.cc/ZRtZkZC9/My-love.png" id="displayImg" class="avatar-img" alt="Foto">
+          </div>
+          
+          <!-- COLUNA DIREITA: TÍTULO, SUBTÍTULO E TAGS -->
+          <div class="profile-info-col">
+            <h1 class="profile-title" id="displayTitle"> ꒰ა Para a minha garota. ໒꒱ ‧	</h1>
+            <div class="status-tag" id="displaySub">Eu costurei nossos futuros juntos, para sempre.</div>
+
+            <div class="badges-row">
+      
+            </div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="letter-body" id="displayText">
+          Olhos tão brilhantes como os seus deveriam ser categorizados como algum tipo de relíquia rara, junto com isso, seu sorriso que ilumina não só o meu coração mas qualquer cômodo que nós estejamos. Eu conheci você, a garota que faz o tempo andar devagar, meu coração palpitar e consome meus pensamentos todos os dias, fui abençoado com sua proximidade, seu toque e escolhido para receber seu amor. Nunca foi acaso, eu desejei você antes de te ter, sonhei com alguém tão doce, tão amorosa, tão gentil e com a alma tão linda como a sua todas as noites, e como uma estrela cadente você se manifestou na minha vida.
+
+Como listo tudo que amo em ti? Como que descrevo cada átomo do seu corpo? Da sua personalidade? Amo cada curva do seu cabelo, me perco no marrom dos seus olhos, mas me reencontro na suavidade da sua boca. Me derreto no conforto do seu abraço, deito no seu peito para escutar cada batida do seu coração e sentir o meu se encher de amor. Traço com minhas mãos as pintas na sua pele, entrelaço seus dedos nos meus e, por um minuto, esqueço qualquer coisa que não seja a sua presença. Ah, como a sua presença me acalma, me conforta, você é tão linda com o nascer do sol, aconchegante como a brisa do entardecer e suave como o céu estrelado a noite.
+Não há uma coisa em você que eu mudaria, o seu jeito fofo de se expressar, seu jeito sensível, sua procura por afeto meu, sua aparência, você pra mim é um reflexo de perfeição mesmo com defeitos.
+
+Cada momento que eu te vi, foi como se meu cérebro tirasse uma foto mental e guardasse em algum lugar especial. Nunca foi difícil prestar atenção em você, já que mesmo sem te conhecer era como se nós já estivéssemos ligados. Quando nos falamos então, tive a certeza de que você é minha e eu sou seu, em poucos dias já estava completamente apaixonado por ti, paixão que nunca parou de crescer nem por um minuto. 
+Acordava e pensava no que podíamos conversar, ia para a escola só para te ver, chegava em casa já procurando o meu telefone e passava o resto do dia procurando sua presença. É simplesmente impossível de se verbalizar a extensão do meu amor por ti, isso é visível já que após inúmeras cartas (incluindo duas de 6 páginas) eu ainda tenho coisas a escrever sobre você. Porque você é tudo meu amor, cada risada nova, cada momento nosso, cada minuto que trocamos olhares eu sinto meu coração queimar novamente, ver seu rosto me trás uma paz imensurável.
+
+Eu sonho com o futuro, quero que você esteja nele como minha esposa, quero que tenhamos nossa casa e nosso espaço no mundo. Que quando eu acordar, toda a manhã veja seu rosto pacífico adormecido ao meu lado, quero sentir o cheiro da nossa cozinha enquanto fazemos café da manhã, quero compartilhar almoços com você, quero te dar um beijo e um abraço antes de sair para trabalhar, quero chegar em casa cansado mas contente em saber que você me espera, ter meu momento de lazer com você - seja nós jogados no sofá assistindo alguma coisa, saindo por ai juntos, dormindo agarrados com nossos gatos. Quero que todas as noites, eu me deite na nossa cama e tenha a segurança da sua presença ao meu lado, assim posso adormecer em paz enquanto tenho você em meus braços.
+Nunca terei como agradecer o suficiente por ser essa garota incrível que você é, ser tão paciente comigo mesmo quando não consigo me expressar, ser tão amorosa, ser tão engraçada, ser tão adorável, ser tão você. 
+Amo tudo em nós, nossos segredos, nosso carinho, nossa dinâmica, é refrescante poder ser sincero com alguém, saber que posso sempre contar contigo independente da situação, amo nossa intimidade também. Sinceramente é tão aliviante poder ser intimo com você de forma confortável para ambos, sentir você perto de mim de forma inocente ou não é estar no paraíso.
+
+Queria novamente te relembrar o quanto eu te amo, para que nunca uma semente de duvida brote na sua cabeça, que nunca seus pensamentos te convençam que não tem alguém que deseja seu sucesso. Por que muito além de namorado, eu sou teu amigo, quero que você cresça e se torne a mulher que eu sei que tem a capacidade de ser. Por que você é inteligente meu amor, você é capaz e pode alcançar toda a meta que estabelecer a si mesma e eu acredito nisso. Quero para sempre notar cada detalhe seu, quero que tenha uma foto impressa sua na minha cabeça, que minhas retinas sempre sejam abençoadas com a sua forma. Por favor, seja minha garota eternamente, sempre corra para os meus braços, sempre queira se deitar comigo, me beije, me abrace, me escolha para sempre. 
+
+Obrigado por me fazer me sentir melhor todos os dias, por sempre me escutar mesmo que seja sobre os mesmos assuntos, por sempre ser compreensiva e me ajudar nos meus surtos. Não tem como você ser uma namorada melhor do que você já é, a sua ''nota'' sempre será 100/10 meu amor. Não tenho uma preocupação sequer com o nosso relacionamento, você não me trás nada além de paz e eu espero que esse sentimento seja recíproco. Espero que guarde todas as minhas palavras com muito carinho, mesmo essa declaração não sendo tão grande como as outras ela ainda é genuína como sempre.
+
+Eu te amo Amari, te amo de verdade e profundamente, toda vez que olho para o seu rosto eu me apaixono novamente, você é um anjo diretamente do céu enviado para mim, você é todo o oxigênio que eu preciso e a solução pra todos os problemas. Eu espero poder te segurar nos meus braços e te chamar de minha para sempre, por ti eu resolvo qualquer problema, encaro qualquer medo e ando no inferno. Prometo segurar sua mão eternamente, te escolher eternamente e até depois de morrermos nossas almas continuarão entrelaçadas. Se reencarnação existir, iremos nos encontrar nas próximas vidas, se formos almas então vagaremos juntos e se não tiver um depois eu viverei a minha única vida te amando.
+
+        </div>
+
+        <div class="music-player-widget">
+          <div class="music-disc">🎵</div>
+          <div class="song-info">
+            <span class="song-name">Forever</span>
+            <span class="artist-name">The Little Dippers</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BOTÃO FIXO DE REVER ANIMAÇÃO NO CANTO DIREITO -->
+  <button class="replay-btn-fixed" id="replayBtn" onclick="restartAnimation()">
+    ↺ Ver frases de novo
+  </button>
+
+  <!-- AUDIO PLAYER COM O LINK DO LITTERBOX -->
+  <audio id="bgMusic" src="https://litter.catbox.moe/an3mwooqi3rrus8z.mp3" preload="auto"></audio>
+
+  <script>
+   // GERADOR AUTOMÁTICO DE ESTRELINHAS MAIS VISÍVEIS
+    function createBgStars() {
+      const starCount = 35; // Aumentamos a quantidade para preencher bem
+      for (let i = 0; i < starCount; i++) {
+        const star = document.createElement('div');
+        star.classList.add('floating-star');
+        
+        const size = Math.random() * 6 + 4 + 'px'; // Estrelas um pouco maiores (4px a 10px)
+        star.style.width = size;
+        star.style.height = size;
+        star.style.left = Math.random() * 100 + 'vw';
+        star.style.animationDuration = Math.random() * 4 + 4 + 's'; // Velocidade agradável (4 a 8 segundos)
+        star.style.animationDelay = Math.random() * 5 + 's';
+        
+        document.body.appendChild(star);
+      }
+    }
+    
+    window.addEventListener('DOMContentLoaded', createBgStars);
+    
+    window.addEventListener('DOMContentLoaded', createBgStars);
+
+    const doodles = {
+      hold: `<img src="https://i.postimg.cc/rFQrqZGy/hold-me.png" class="doodle-img" alt="Hold me">`,
+      kiss: `<img src="https://i.postimg.cc/Y9H96QNd/kiss-me-1.png" class="doodle-img" alt="Kiss me">`,
+      whisper: `<img src="https://i.postimg.cc/Y9zSbjbQ/whisper-sweetly.png" class="doodle-img" alt="Whisper sweetly">`,
+      love: `<img src="https://i.postimg.cc/zXWB3tYP/love-me-1.png" class="doodle-img" alt="Love me">`,
+      forever: `<img src="https://i.postimg.cc/C58FB1XJ/forever.jpg" class="doodle-img" alt="Forever">`
+    };
+
+    const lyricsTimeline = [
+      { time: 33.0, text: "Hold me...", doodle: doodles.hold },
+      { time: 36.0, text: "Kiss me...", doodle: doodles.kiss },
+      { time: 40.0, text: "Whisper sweetly...", doodle: doodles.whisper },
+      { time: 46.0, text: "That you love me...", doodle: doodles.love },
+      { time: 53.0, text: "Forever. ♥", doodle: doodles.forever }
+    ];
+
+    const audio = document.getElementById('bgMusic');
+    const envelopeScreen = document.getElementById('envelopeScreen');
+    const animScreen = document.getElementById('animScreen');
+    const waitingIntro = document.getElementById('waitingIntro');
+    const lyricCard = document.getElementById('lyricCard');
+    const lyricText = document.getElementById('lyricText');
+    const doodleBox = document.getElementById('doodleBox');
+    const letterScreen = document.getElementById('letterScreen');
+    const replayBtn = document.getElementById('replayBtn');
+
+    let syncInterval = null;
+
+function startSequence() {
+      document.body.classList.remove('scrollable'); // Trava a rolagem de novo
+      envelopeScreen.classList.add('hidden');
+      letterScreen.classList.remove('active');
+      replayBtn.style.display = 'none';
+
+      audio.currentTime = 0;
+      audio.play().catch(e => console.log("Erro no áudio:", e));
+
+      animScreen.classList.add('active');
+      waitingIntro.style.display = 'flex';
+      lyricCard.classList.remove('show');
+
+      let currentStep = 0;
+
+      clearInterval(syncInterval);
+      syncInterval = setInterval(() => {
+        const currentTime = audio.currentTime;
+
+        if (currentStep < lyricsTimeline.length) {
+          const target = lyricsTimeline[currentStep];
+
+          if (currentTime >= target.time) {
+            if (currentStep === 0) {
+              waitingIntro.style.display = 'none';
+            }
+
+            lyricCard.classList.remove('show');
+            setTimeout(() => {
+              lyricText.textContent = target.text;
+              doodleBox.innerHTML = target.doodle;
+              lyricCard.classList.add('show');
+            }, 100);
+
+            currentStep++;
+          }
+        } else if (currentTime >= 57.0) {
+          clearInterval(syncInterval);
+          lyricCard.classList.remove('show');
+          setTimeout(() => {
+            animScreen.classList.remove('active');
+            letterScreen.classList.add('active');
+            document.body.classList.add('scrollable'); // Libera rolagem para ler a carta
+            replayBtn.style.display = 'flex';
+          }, 400);
+        }
+      }, 50);
+    }
+
+    function pularParaCarta() {
+      clearInterval(syncInterval);
+      audio.pause();
+      audio.currentTime = 57.0; 
+      lyricCard.classList.remove('show');
+      animScreen.classList.remove('active');
+      letterScreen.classList.add('active');
+      document.body.classList.add('scrollable'); // Libera rolagem para ler a carta
+      replayBtn.style.display = 'flex';
+    }
+  </script>
+</body>
+</html>
